@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Vườn Hoa Học Tập - Learning Garden</title>
+    <!-- Thư viện Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thư viện Icon FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font chữ -->
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+    
+    <!-- LIÊN KẾT ĐẾN FILE CSS RIÊNG -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-gray-800">
+
+    <!-- Nhạc nền & Âm thanh -->
+    <audio id="bg-music" loop>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/c/c4/Muriel-Nguyen-Xuan-Chopin-valse-op64-1.ogg" type="audio/ogg">
+    </audio>
+    
+    <!-- Nút nhạc -->
+    <div class="fixed top-4 left-4 z-50">
+        <button onclick="toggleMusic()" id="music-btn" class="bg-white/80 backdrop-blur p-3 rounded-full shadow-lg text-gray-400 hover:text-pink-500 transition text-xl">
+            <i class="fas fa-volume-mute"></i>
+        </button>
+    </div>
+
+    <!-- Hình nền trang trí -->
+    <div id="bg-decor"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- MODAL SỬA HỌC SINH -->
+    <div id="edit-student-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-[60]">
+        <div class="bg-white rounded-2xl p-6 shadow-xl w-full max-w-md relative">
+            <button onclick="closeEditModal('student')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">✏️ Sửa Thông Tin Học Sinh</h2>
+            <form id="edit-student-form" class="space-y-4">
+                <input type="hidden" id="edit-original-username">
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">Tên đăng nhập</label>
+                    <input type="text" id="edit-username" class="w-full border p-3 rounded-lg bg-gray-100" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">Mật khẩu</label>
+                    <input type="text" id="edit-password" class="w-full border p-3 rounded-lg outline-none focus:border-blue-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-1">Lớp</label>
+                        <input type="text" id="edit-class" class="w-full border p-3 rounded-lg outline-none focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-1">Số điện thoại</label>
+                        <input type="text" id="edit-phone" class="w-full border p-3 rounded-lg outline-none focus:border-blue-500" placeholder="Nhập SĐT">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeEditModal('student')" class="flex-1 py-3 bg-gray-200 rounded-lg font-bold text-gray-600">Hủy</button>
+                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700">Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL SỬA CÂU HỎI (MỚI) -->
+    <div id="edit-question-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-[60]">
+        <div class="bg-white rounded-2xl p-6 shadow-xl w-full max-w-lg relative">
+            <button onclick="closeEditModal('question')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            <h2 class="text-2xl font-bold text-purple-600 mb-4">✏️ Sửa Câu Hỏi</h2>
+            <form id="edit-question-form" class="space-y-3">
+                <input type="hidden" id="edit-q-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-1">Môn học</label>
+                        <select id="edit-q-subject" class="w-full border p-2 rounded-lg font-bold">
+                            <option value="Toán">Toán</option>
+                            <option value="Tiếng Việt">Tiếng Việt</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-1">Đáp án ĐÚNG</label>
+                        <input type="text" id="edit-q-answer" class="w-full border border-green-300 bg-green-50 p-2 rounded-lg font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">Câu hỏi</label>
+                    <input type="text" id="edit-q-question" class="w-full border p-2 rounded-lg font-bold">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">Các đáp án SAI (cách nhau dấu phẩy)</label>
+                    <input type="text" id="edit-q-options" class="w-full border border-red-200 bg-red-50 p-2 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">Giải thích</label>
+                    <textarea id="edit-q-explain" class="w-full border p-2 rounded-lg" rows="2"></textarea>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <button type="button" onclick="closeEditModal('question')" class="flex-1 py-3 bg-gray-200 rounded-lg font-bold text-gray-600">Hủy</button>
+                    <button type="submit" class="flex-1 py-3 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700">Lưu Cập Nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- === MÀN HÌNH ĐĂNG NHẬP === -->
+    <div id="login-screen" class="screen active min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border-4 border-white relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-purple-500"></div>
+
+            <div class="mb-6">
+                <i class="fas fa-school text-6xl text-blue-500 mb-2 animate-bounce"></i>
+                <h1 class="text-3xl font-bold text-blue-600">🌸 Vườn Hoa Học Tập</h1>
+                <p class="text-gray-500">Học vui - Trồng cây - Nhận quà</p>
+            </div>
+
+            <div class="flex bg-gray-100 rounded-full p-1 mb-6">
+                <button onclick="setLoginMode('student')" id="tab-student" class="flex-1 py-2 rounded-full font-bold transition-all bg-white shadow text-blue-600">👨‍🎓 Học Sinh</button>
+                <button onclick="setLoginMode('teacher')" id="tab-teacher" class="flex-1 py-2 rounded-full font-bold transition-all text-gray-500">👩‍🏫 Giáo Viên</button>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="text" id="username" placeholder="Tên đăng nhập" class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-400 outline-none transition" required>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="password" id="password" placeholder="Mật khẩu" class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-400 outline-none transition" required>
+                </div>
+                
+                <div id="student-fields" class="space-y-3 text-left text-sm text-gray-500">
+                    <p class="text-center italic">Đăng nhập để vào lớp học của bạn!</p>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition">
+                    VÀO LỚP NGAY 🚀
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- === MÀN HÌNH HỌC SINH (GIỮ NGUYÊN) === -->
+    <div id="student-screen" class="screen pb-24">
+        <!-- Header -->
+        <div class="bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-sm border-b border-blue-100">
+            <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-2xl shadow-md border-2 border-white">
+                        👤
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-800" id="student-display-name">Học sinh</h2>
+                        <p class="text-xs text-gray-500" id="student-display-class">Lớp 2A</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex items-center gap-1 bg-yellow-100 px-3 py-1.5 rounded-full border border-yellow-300 shadow-sm">
+                        <i class="fas fa-coins text-yellow-600 text-lg"></i>
+                        <span class="font-bold text-yellow-800 text-lg" id="coin-display">0</span>
+                    </div>
+                    <div class="flex items-center gap-1 bg-blue-100 px-3 py-1.5 rounded-full border border-blue-300 shadow-sm">
+                        <i class="fas fa-tint text-blue-600 text-lg"></i>
+                        <span class="font-bold text-blue-800 text-lg" id="water-display">0</span>
+                    </div>
+                    <button onclick="logout()" class="w-10 h-10 rounded-full bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition text-lg shadow-sm">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto p-4">
+            <!-- TAB 1: VƯỜN CÂY -->
+            <div id="tab-content-garden" class="tab-content active">
+                <div class="bg-gradient-to-b from-green-200 to-green-100 border-4 border-white rounded-3xl p-6 mb-6 shadow-xl relative overflow-hidden">
+                    <h2 class="text-3xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-leaf text-green-600 text-4xl"></i> Vườn Hoa Của Bé
+                    </h2>
+                    <p class="text-green-700 mb-4 font-semibold" id="garden-level">📍 Tầng 1: Mặt Đất 🌱</p>
+                    <p class="text-sm text-green-600 mb-2 italic">💡 Mẹo: Tưới nước để cây lớn lên nhé!</p>
+                    
+                    <!-- Grid Vườn Hoa -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="garden-grid">
+                        <!-- Cây sẽ được gen bằng JS -->
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-4 shadow-lg border-2 border-white text-white flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg">☁️ Mở Khóa Tầng Mây</h3>
+                        <p class="text-sm opacity-90">Mở rộng vườn để trồng thêm cây!</p>
+                    </div>
+                    <button onclick="upgradeGarden()" class="bg-yellow-400 text-purple-900 px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-yellow-300 bounce-click text-lg">
+                        Nâng cấp (500 💰)
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: HỌC TẬP -->
+            <div id="tab-content-study" class="tab-content">
+                <div class="bg-white rounded-3xl shadow-lg p-6 border-2 border-indigo-100">
+                    <h2 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
+                        <i class="fas fa-book-open text-3xl"></i> Bài Tập Hôm Nay
+                    </h2>
+                    
+                    <div class="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide" id="subject-filters"></div>
+                    <div id="quiz-message" class="hidden text-center text-gray-500 py-8 text-lg"></div>
+                    
+                    <div id="current-question-card" class="hidden space-y-4">
+                        <div class="bg-indigo-50 p-5 rounded-2xl border-l-4 border-indigo-500 relative">
+                            <span class="absolute top-2 right-2 text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded font-bold" id="q-subject-tag">Toán</span>
+                            <p class="text-xl font-bold text-indigo-900 mt-1" id="q-text">Câu hỏi...</p>
+                        </div>
+                        <div id="q-options" class="space-y-3"></div>
+                        <div id="q-result" class="hidden text-lg animate-bounce"></div>
+                        <button onclick="nextQuestion()" id="next-btn" class="hidden w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg text-lg">➡️ Câu Tiếp Theo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: CỬA HÀNG -->
+            <div id="tab-content-shop" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-3xl p-6 shadow-lg border-2 border-orange-100">
+                        <h3 class="font-bold text-2xl text-orange-600 mb-4">🪴 Cửa Hàng Tiện Lợi</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="text-4xl">🌱</div>
+                                    <div>
+                                        <p class="font-bold text-gray-800">Hạt Giống Thần Kỳ</p>
+                                        <p class="text-xs text-gray-500">+30 nước (Quà)</p>
+                                    </div>
+                                </div>
+                                <button onclick="buyItem('seed', 20)" class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 bounce-click text-lg">20 💰</button>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="text-4xl">💧</div>
+                                    <div>
+                                        <p class="font-bold text-gray-800">Bình Nước Thần</p>
+                                        <p class="text-xs text-gray-500">+50 nước</p>
+                                    </div>
+                                </div>
+                                <button onclick="buyItem('water', 10)" class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-600 bounce-click text-lg">10 💰</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                        <div class="absolute top-2 right-2 opacity-20 text-6xl"><i class="fas fa-crown"></i></div>
+                        <h3 class="font-bold text-2xl mb-2 flex items-center gap-2"><i class="fas fa-crown text-yellow-400 text-3xl animate-pulse"></i> Khu VIP</h3>
+                        <p class="text-purple-100 text-sm mb-4">Đăng ký VIP để nhận x2 xu và x3 nước khi làm bài!</p>
+                        <button onclick="toggleVip()" id="vip-btn" class="w-full bg-yellow-400 text-purple-900 font-bold py-3 rounded-xl shadow-lg hover:bg-yellow-300 bounce-click text-lg">👑 Đăng Ký VIP (Miễn phí test)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation bar -->
+        <div class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur shadow-[0_-5px_20px_rgba(0,0,0,0.1)] border-t border-gray-100 z-40 safe-area-bottom">
+            <div class="max-w-4xl mx-auto flex justify-around py-3">
+                <button onclick="switchTab('garden')" class="nav-btn active flex flex-col items-center p-2 group w-1/3" id="nav-garden">
+                    <i class="fas fa-leaf text-3xl mb-1 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold">Vườn</span>
+                </button>
+                <button onclick="switchTab('study')" class="nav-btn flex flex-col items-center p-2 group w-1/3" id="nav-study">
+                    <i class="fas fa-graduation-cap text-3xl mb-1 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold">Học Tập</span>
+                </button>
+                <button onclick="switchTab('shop')" class="nav-btn flex flex-col items-center p-2 group w-1/3" id="nav-shop">
+                    <i class="fas fa-store text-3xl mb-1 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold">Cửa Hàng</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MÀN HÌNH GIÁO VIÊN / ADMIN === -->
+    <div id="teacher-screen" class="screen min-h-screen bg-gray-50 pb-10">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 shadow-lg sticky top-0 z-50">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-chalkboard-teacher text-4xl"></i>
+                    <div>
+                        <h1 class="font-bold text-2xl" id="teacher-title">Trang Giáo Viên</h1>
+                        <p class="text-sm opacity-80">Quản lý lớp học & Bài tập</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> <span class="hidden md:inline">Thoát</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto p-6">
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <p class="text-gray-600 font-bold mb-1">Câu Hỏi</p>
+                    <p class="text-4xl font-bold text-green-600" id="teacher-q-count">0</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <p class="text-gray-600 font-bold mb-1">Học Sinh</p>
+                    <p class="text-4xl font-bold text-blue-600" id="teacher-s-count">0</p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-pink-500 text-white p-6 rounded-xl shadow-lg">
+                    <p class="font-bold mb-1">💡 Gợi ý</p>
+                    <p class="text-sm">Hãy thêm nhiều bài tập vui nhộn để học sinh có thêm xu tưới cây!</p>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex gap-4 mb-6 border-b border-gray-300 overflow-x-auto">
+                <button onclick="switchTeacherTab('questions')" id="t-tab-questions-btn" class="t-tab active px-4 py-2 font-bold text-blue-600 border-b-4 border-blue-600 transition whitespace-nowrap">❓ Quản Lý Bài Tập</button>
+                <button onclick="switchTeacherTab('students')" id="t-tab-students-btn" class="t-tab px-4 py-2 font-bold text-gray-500 hover:text-gray-700 transition whitespace-nowrap">👨‍🎓 Quản Lý Học Sinh</button>
+                <button onclick="switchTeacherTab('teachers')" id="t-tab-teachers-btn" class="t-tab px-4 py-2 font-bold text-gray-500 hover:text-gray-700 transition whitespace-nowrap">🏫 Quản Lý Giáo Viên</button>
+            </div>
+
+            <!-- Questions Tab -->
+            <div id="t-tab-questions" class="t-content active">
+                <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <h2 class="font-bold text-xl mb-4 text-gray-800"><i class="fas fa-plus-circle text-blue-500"></i> Thêm Câu Hỏi Mới</h2>
+                    <form id="add-question-form" class="grid grid-cols-1 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <select id="t-subject" class="border p-3 rounded-lg bg-gray-50 font-bold outline-none focus:border-blue-500">
+                                <option value="Toán">📐 Toán</option>
+                                <option value="Tiếng Việt">📖 Tiếng Việt</option>
+                                <option value="Tiếng Anh">🇬🇧 Tiếng Anh</option>
+                            </select>
+                            <input type="text" id="t-answer" placeholder="✅ Đáp án ĐÚNG" class="border border-green-300 bg-green-50 p-3 rounded-lg font-bold outline-none focus:border-green-500" required>
+                        </div>
+                        <input type="text" id="t-question" placeholder="❓ Nội dung câu hỏi" class="border p-3 rounded-lg font-bold outline-none focus:border-blue-500" required>
+                        <input type="text" id="t-options" placeholder="❌ Các đáp án SAI (cách nhau dấu phẩy)" class="border border-red-200 bg-red-50 p-3 rounded-lg font-bold outline-none focus:border-red-500">
+                        <textarea id="t-explain" placeholder="📝 Giải thích (hiện khi trả lời đúng/sai)" class="border p-3 rounded-lg outline-none focus:border-blue-500" rows="2"></textarea>
+                        <button type="submit" class="bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-md active:scale-95">💾 Lưu Câu Hỏi</button>
+                    </form>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-4 border-b">Môn</th>
+                                <th class="p-4 border-b">Câu hỏi</th>
+                                <th class="p-4 border-b hidden md:table-cell">Đáp án</th>
+                                <th class="p-4 border-b text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacher-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Students Tab -->
+            <div id="t-tab-students" class="t-content hidden">
+                <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <h2 class="font-bold text-xl mb-4 text-gray-800"><i class="fas fa-user-plus text-green-500"></i> Thêm Học Sinh</h2>
+                    <form id="add-student-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input type="text" id="s-username" placeholder="Tên đăng nhập" class="border p-3 rounded-lg outline-none focus:border-green-500" required>
+                        <input type="text" id="s-password" placeholder="Mật khẩu" class="border p-3 rounded-lg outline-none focus:border-green-500" value="123" required>
+                        <input type="text" id="s-phone" placeholder="Số điện thoại" class="border p-3 rounded-lg outline-none focus:border-green-500">
+                        <button type="submit" class="bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-md active:scale-95">Thêm</button>
+                    </form>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-4">Tên</th>
+                                <th class="p-4">Thành tích</th>
+                                <th class="p-4">Thông tin</th>
+                                <th class="p-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Teachers Tab -->
+            <div id="t-tab-teachers" class="t-content hidden">
+                <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <h2 class="font-bold text-xl mb-4 text-gray-800"><i class="fas fa-user-tie text-purple-500"></i> Thêm Giáo Viên</h2>
+                    <form id="add-teacher-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="tea-username" placeholder="Tên đăng nhập" class="border p-3 rounded-lg outline-none focus:border-purple-500" required>
+                        <input type="text" id="tea-password" placeholder="Mật khẩu" class="border p-3 rounded-lg outline-none focus:border-purple-500" value="123" required>
+                        <button type="submit" class="bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition shadow-md active:scale-95">Thêm Giáo Viên</button>
+                    </form>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-4">Tên đăng nhập</th>
+                                <th class="p-4">Mật khẩu</th>
+                                <th class="p-4 w-20">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacher-account-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
